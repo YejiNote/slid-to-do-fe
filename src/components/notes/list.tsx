@@ -36,9 +36,9 @@ export const NoteList = ({notesData}: {notesData: NoteCommon[]}) => {
         console.log('response', response)
     }
 
-    useEffect(() => {
-        fetchData()
-    },[])
+    // useEffect(() => {
+    //     fetchData()
+    // },[])
 
     /*노트 제목 클릭 시 사이드 모달 오픈* */
     const openNoteDetail = (noteId: number) => {

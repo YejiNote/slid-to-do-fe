@@ -14,14 +14,11 @@ const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
         return <NotFound />
     }
 
-    if (status === 409) {
-        return <div>{message}</div>
-    }
     return (
-        <div role="alert">
+        <div role="alert" className="flex flex-col items-center">
             <p>Something went wrong:</p>
 
-            <div className="flex flex-col items-center">
+            <div className="">
                 <p>코드 : {status ?? '알 수 없음'}</p>
                 <p className="mt-1">{message}</p>
             </div>
