@@ -1,31 +1,47 @@
 'use client'
 
+import {useRouter} from 'next/navigation'
 import React, {useEffect, useRef, useState} from 'react'
 
-import {useRouter} from 'next/navigation'
-
 import {useMutation, useQueryClient} from '@tanstack/react-query'
+import clsx from 'clsx'
 
+import useModal from '@/hooks/use-modal'
 import {del} from '@/lib/api'
 
 import TwoButtonModal from '../common/modal/two-buttom-modal'
-import useModal from '@/hooks/use-modal'
-
-import {useModalStore} from '@/store/use-modal-store'
 
 const NotesSelect: React.FC<{noteId: number}> = ({noteId}) => {
-    const clsx = require('clsx')
     const [isOpen, setIsOpen] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null)
-    const {clearModal} = useModalStore()
+    const containerReferance = useRef<HTMLDivElement>(null)
     const router = useRouter()
+
+    const queryClient = useQueryClient()
+
+    const deleteMutation = useMutation<void, Error, number>({
+        mutationFn: (id) =>
+            del({
+                endpoint: `notes/${id}`,
+                options: {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('refreshToken')}`,
+                    },
+                },
+            }),
+        onSuccess: () => {
+            /**삭제 성공 후 'notes' 쿼리 무효화 → 자동 리페치*/
+            queryClient.invalidateQueries({queryKey: ['notes']})
+        },
+        onError: () => {
+            throw Error
+        },
+    })
 
     /**노트 삭제 확인 모달 */
     const {openModal, closeModal} = useModal(
         <TwoButtonModal
             handleLeftBtn={() => {
-                /**closeModal()*/
-                clearModal()
+                closeModal()
             }}
             handleRightBtn={() => {
                 deleteMutation.mutate(noteId)
@@ -37,31 +53,10 @@ const NotesSelect: React.FC<{noteId: number}> = ({noteId}) => {
         />,
     )
 
-    const queryClient = useQueryClient()
-    // 삭제 mutation
-    const deleteMutation = useMutation<void, Error, number>({
-        mutationFn: (id) =>
-            del({
-                endpoint: `notes/${id}`,
-                options: {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                },
-            }),
-        onSuccess: () => {
-            /**삭제 성공 후 'notes' 쿼리 무효화 → 자동 리페치*/
-            queryClient.invalidateQueries({queryKey: ['notes']})
-        },
-        onError: () => {
-            console.error('노트 삭제 실패')
-        },
-    })
-
     /** 바깥 클릭 시 닫기 */
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+            if (containerReferance.current && !containerReferance.current.contains(event.target as Node)) {
                 setIsOpen(false)
             }
         }
@@ -74,11 +69,11 @@ const NotesSelect: React.FC<{noteId: number}> = ({noteId}) => {
     }, [isOpen])
 
     return (
-        <div className="relative inline-block text-left" ref={containerRef}>
+        <div className="relative inline-block text-left" ref={containerReferance}>
             <button
                 type="button"
                 aria-haspopup="true"
-                onClick={() => setIsOpen((prev) => !prev)}
+                onClick={() => setIsOpen((previous) => !previous)}
                 className="w-6 h-6 rounded-full bg-custom_slate-50  focus:outline-none relative"
             >
                 <div className="flex flex-col items-center justify-center space-y-0.5">

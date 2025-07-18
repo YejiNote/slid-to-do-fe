@@ -1,5 +1,6 @@
 import React, {Suspense} from 'react'
 import {ErrorBoundaryProvider} from '../providers/error-boundary-provider'
+import LoadingSpinner from '@/components/common/loading-spinner'
 
 export const metadata = {
     title: 'notes',
@@ -12,7 +13,7 @@ const layout = ({
 }>) => {
     return (
         <ErrorBoundaryProvider>
-            <Suspense>
+            <Suspense fallback={<LoadingSpinner />}>
                 <main>{children}</main>
             </Suspense>
         </ErrorBoundaryProvider>
