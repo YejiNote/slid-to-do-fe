@@ -3,10 +3,12 @@
 import {ErrorBoundary, FallbackProps} from 'react-error-boundary'
 import NotFound from './not-found'
 import LoginPage from './login/page'
+import {useQueryErrorResetBoundary} from '@tanstack/react-query'
 
 const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
+    const {reset} = useQueryErrorResetBoundary()
     const {status, message} = error as Error & {status?: number; message: string}
-    console.log('ErrorBoundary error:', error)
+  
     if (status === 401) {
         return <LoginPage />
     }
@@ -14,6 +16,10 @@ const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
         return <NotFound />
     }
 
+    const handleReset = () => {
+        alert('새로고침됩니다!')
+        resetErrorBoundary()
+    }
     return (
         <div role="alert" className="flex flex-col items-center">
             <p>Something went wrong:</p>
@@ -22,10 +28,7 @@ const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
                 <p>코드 : {status ?? '알 수 없음'}</p>
                 <p className="mt-1">{message}</p>
             </div>
-            <button
-                onClick={resetErrorBoundary}
-                className="mt-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-            >
+            <button onClick={handleReset} className="mt-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
                 Try again
             </button>
         </div>
